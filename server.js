@@ -30,20 +30,22 @@ function listening() {
   console.log(`running on localhost: ${port}`);
 };
 
-// POST
-const data = [];
-app.post('/add', addInfo);
-
-function addInfo(req, res) {
-  projectData['date'] = req.body.date;
-  projectData['temp'] = req.body.temp;
-  projectData['content'] = req.body.content;
-  res.send(projectData);
-}
-
 // GET
 app.get('/all', getInfo);
 
+// Callback function
 function getInfo(req, res) {
+  res.send(projectData);
+}
+
+// POST
+app.post('/add', addData);
+
+function addData(req, res) {
+  projectData = {
+    date: req.body.date,
+    temp: req.body.temp,
+    content: req.body.content
+  }
   res.send(projectData);
 }
