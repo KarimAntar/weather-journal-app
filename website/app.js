@@ -2,8 +2,8 @@
 const form = document.querySelector('.app__form');
 
 // API URL and KEY
-const apiURL = 'http://api.openweathermap.org/data/2.5/weather?zip=';
-const apiKey = '&appid=a559376142b656757b98ba82bad5bd9e&units=metric';
+const base = 'http://api.openweathermap.org/data/2.5/weather';
+const apiKey = 'a559376142b656757b98ba82bad5bd9e';
 
 
 // Create a new date instance dynamically with JS
@@ -17,48 +17,42 @@ document.getElementById('generate').addEventListener('click', generateClick);
 function generateClick(e) {
     e.preventDefault();
     // get user input values
-    const newZip = document.getElementById('zip').value;
+    const zipCode = document.getElementById('zip').value;
     const content = document.getElementById('feelings').value;
 
-    getWeather(apiURL, newZip, apiKey)
-    .then(function (userData) {
+    getWeather(base, zipCode, apiKey)
+    .then(function (data) {
       // add data to POST request
-      postData('/add', { date: newDate, temp: userData.main.temp, content })
-    }).then(function (newData) {
-      // call updateUI to update browser content
-      updateUI()
+      postData('/add', { date: newDate, temp: data.main.temp, content })
+    }).then(function (data) {
+      // call update function to update browser content
+      update()
     })
   // reset form
   form.reset();
 }
 
 
-/* Function to GET Web API Data*/
-const getWeather = async (apiURL, newZip, apiKey) => {
-    // res equals to the result of fetch function
-    const res = await fetch(apiURL + newZip + apiKey);
+const getWeather = async (base, zip, apiKey) => {
+    const res = await fetch(`${base}?zip=${zip}&appid=${apiKey}&units=metric`);
     try {
-      // userData equals to the result of fetch function
-      const userData = await res.json();
-      return userData;
+      const data = await res.json();
+      return data;
     } catch (error) {
       console.log("error", error);
     }
   }
   
-  /* Function to POST data */
+  // Post Data
 const postData = async (url = '', data = {}) => {
     const req = await fetch(url, {
       method: "POST",
       credentials: "same-origin",
       headers: {
-        "Content-Type": "application/json;charset=UTF-8"
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        date: data.date,
-        temp: data.temp,
-        content: data.content
-      })
+      // To match data with "Content-Type" header
+      body: JSON.stringify(data)
     })
   
     try {
@@ -70,14 +64,14 @@ const postData = async (url = '', data = {}) => {
     }
   };
 
-  const updateUI = async () => {
+  const update = async () => {
     const request = await fetch('/all');
     try {
-      const allData = await request.json()
-      // Update entry values
-      document.getElementById('date').innerHTML = allData.date;
-      document.getElementById('temp').innerHTML = allData.temp;
-      document.getElementById('content').innerHTML = allData.content;
+      const upData = await request.json()
+      // Update values
+      document.getElementById('date').innerHTML = `Date: ${upData.date}`;
+      document.getElementById('temp').innerHTML = `Temperature: ${Math.round(upData.temp)} °C`;
+      document.getElementById('content').innerHTML = `Feeling: ${upData.content}`;
     }
     catch (error) {
       console.log("error", error);
